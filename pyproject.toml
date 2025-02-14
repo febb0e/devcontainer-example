@@ -1,0 +1,53 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "devcontainer-example"
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Fabian Tsirogiannis", email = "fabian.tsirogiannis@imbus.de" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = ["robotframework", "robotframework-browser", "robotcode[all]"]
+
+[tool.hatch.version]
+path = "src/devcontainer-example/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/devcontainer-example tests}"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/devcontainer-example"]
+
+[tool.hatch.envs.default]
+dependencies = ["robotframework-tidy", "robotframework-robocop"]
+post-install-commands = [
+  "rfbrowser init",
+  "npm install pm2@latest -g",
+  "cd todo-app && npm install",
+]
+
+[tool.hatch.envs.default.scripts]
+run-tests = ["robotcode robot {args:tests}"]
+start-todo-app = [
+  'pm2 start "VITE_ENVIRONMENT=Test npm run dev --prefix todo-app" --name Test',
+]
+stop-todo-app = [
+  "pm2 delete all",
+]
